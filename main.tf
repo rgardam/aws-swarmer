@@ -149,9 +149,6 @@ resource "aws_kms_alias" "swarm_key_alias" {
   target_key_id = "${aws_kms_key.swarm_key.key_id}"
 }
 
-output "swarm_kms_key_id"   { value = "${aws_kms_key.swarm_key.id}" }
-
-
 ### Template fillers ###
 data "template_file" "cloud_init_bootstrap" {
   template   = "${file("${path.module}/templates/cloud-init-bootstrap.yml.tmp")}"
@@ -198,8 +195,6 @@ data "template_file" "instance_profile" {
 }
 
 ### IAM Instance Policy ###
-
-
 resource "aws_iam_role" "swarm" {
   name = "TF_swarm_instance_profile"
 

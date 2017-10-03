@@ -13,19 +13,16 @@ users:
       - ${ssh_public_keystring}
  
 runcmd:
-  - yum install -y aws-cli jq docker
-  - service docker start
-  - chkconfig --add docker
+
 
 --==BOUNDARY==
-
 Content-Type: text/x-shellscript
-
-#!/bin/sh
-
+#!/bin/bash
+yum install -y aws-cli jq docker
+service docker start
+chkconfig --add docker
 SWARMJOINKEY=$(aws ssm get-parameters --region ${region} --names ${random_id}.${type}Key --with-decryption --query Parameters[0].Value)
 SWARMJOINKEY=`echo $SWARMJOINKEY | sed -e 's/^"//' -e 's/"$//'`
-
 docker swarm join --token $SWARMJOINKEY ${manager_ip}
 
 --==BOUNDARY==
