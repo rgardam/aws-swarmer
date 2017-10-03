@@ -19,6 +19,5 @@ To destroy all infrastructure
 TODO. 
 
 - Use autoscaling groups to manage workers
-- Use NAT to enable private networks for workers
 - Handle multiple ssh users
 - Make into a proper terraform module
