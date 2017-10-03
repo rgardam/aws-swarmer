@@ -1,0 +1,32 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [        
+        "ec2:Describe*"
+      ],
+      "Resource": "*"
+    },
+    {
+         "Effect":"Allow",
+         "Action":[
+            "ssm:GetParameters",
+            "ssm:PutParameter"
+         ],
+         "Resource":[
+            "arn:aws:ssm:${region}:${account_id}:parameter/${random_id}.*"
+         ]
+      },
+      {
+         "Effect":"Allow",
+         "Action":[
+            "kms:Decrypt",
+            "kms:Encrypt"
+         ],
+         "Resource":[
+            "arn:aws:kms:${region}:${account_id}:key/${kms_key_id}"
+         ]
+      }
+  ]
+}

@@ -1,0 +1,31 @@
+Content-Type: multipart/mixed; boundary="==BOUNDARY=="
+MIME-Version: 1.0
+
+--==BOUNDARY==
+Content-Type: text/text/cloud-config; charset="us-ascii"
+
+#cloud-config
+users:
+  - name: docker
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    shell: /bin/bash
+    ssh-authorized-keys:
+      - ${ssh_public_keystring}
+ 
+runcmd:
+  - yum install -y aws-cli jq docker
+  - service docker start
+  - chkconfig --add docker
+
+--==BOUNDARY==
+
+Content-Type: text/x-shellscript
+
+#!/bin/sh
+
+SWARMJOINKEY=$(aws ssm get-parameters --region ${region} --names ${random_id}.${type}Key --with-decryption --query Parameters[0].Value)
+SWARMJOINKEY=`echo $SWARMJOINKEY | sed -e 's/^"//' -e 's/"$//'`
+
+docker swarm join --token $SWARMJOINKEY ${manager_ip}
+
+--==BOUNDARY==

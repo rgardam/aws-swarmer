@@ -1,0 +1,23 @@
+Content-Type: multipart/mixed; boundary="==BOUNDARY=="
+MIME-Version: 1.0
+
+--==BOUNDARY==
+Content-Type: text/text/cloud-config; charset="us-ascii"
+
+#cloud-config
+users:
+  - name: docker
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    shell: /bin/bash
+    ssh-authorized-keys:
+      - ${ssh_public_keystring}
+ 
+runcmd:
+  - yum install -y aws-cli jq docker
+  - service docker start
+  - chkconfig --add docker
+  - docker swarm init
+  - aws ssm put-parameter --name ${random_id}.managerKey --value "`docker swarm join-token manager -q`" --type SecureString --region ${region}
+  - aws ssm put-parameter --name ${random_id}.workerKey --value "`docker swarm join-token worker -q`" --type SecureString --region ${region}
+
+--==BOUNDARY==
