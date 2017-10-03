@@ -45,9 +45,13 @@ module "vpc" {
 
   azs            = ["eu-west-1a", "eu-west-1b"]
   public_subnets = ["10.0.101.0/24", "10.0.102.0/24"]
+  private_subnets = ["10.0.1.0/24", "10.0.2.0/24"]
 
   enable_dns_support   = true
   enable_dns_hostnames = true
+
+  enable_nat_gateway = true
+  single_nat_gateway = true
 
   tags = {
     Owner       = "user"
@@ -246,9 +250,9 @@ resource "aws_instance" "additional_managers" {
   count                       = "1"
   ami                         = "${data.aws_ami.amazon_linux.id}"
   instance_type               = "t2.micro"
-  subnet_id                   = "${element(module.vpc.public_subnets, count.index)}"
+  subnet_id                   = "${element(module.vpc.private_subnets, count.index)}"
   user_data                   = "${data.template_file.cloud_init_manager.rendered}"
-  associate_public_ip_address = true
+  associate_public_ip_address = false
   vpc_security_group_ids      = ["${aws_security_group.swarm.id}"]
   iam_instance_profile        = "${aws_iam_instance_profile.swarm.name}"
 }
@@ -258,9 +262,9 @@ resource "aws_instance" "workers" {
   count                       = "2"
   ami                         = "${data.aws_ami.amazon_linux.id}"
   instance_type               = "t2.micro"
-  subnet_id                   = "${element(module.vpc.public_subnets, count.index)}"
+  subnet_id                   = "${element(module.vpc.private_subnets, count.index)}"
   user_data                   = "${data.template_file.cloud_init_worker.rendered}"
-  associate_public_ip_address = true
+  associate_public_ip_address = false
   vpc_security_group_ids      = ["${aws_security_group.swarm.id}"]
   iam_instance_profile        = "${aws_iam_instance_profile.swarm.name}"
 }
