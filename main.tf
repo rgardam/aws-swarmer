@@ -257,7 +257,7 @@ resource "aws_instance" "additional_managers" {
   iam_instance_profile        = "${aws_iam_instance_profile.swarm.name}"
 }
 
-### Swarm Manager Manager Instances ###
+### Swarm Manager Worker Instances ###
 resource "aws_instance" "workers" {
   count                       = "2"
   ami                         = "${data.aws_ami.amazon_linux.id}"
