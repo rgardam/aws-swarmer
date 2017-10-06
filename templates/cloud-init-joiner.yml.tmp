@@ -29,4 +29,7 @@ SWARMJOINKEY=$(aws ssm get-parameters --region ${region} --names ${random_id}.${
 SWARMJOINKEY=`echo $SWARMJOINKEY | sed -e 's/^"//' -e 's/"$//'`
 docker swarm join --token $SWARMJOINKEY ${manager_ip}
 
+# make sure managers don't host containers. ELB only connects to workers
+for i in `docker node ls -f "role=manager" -q`;do docker node update --availability drain $i;done
+
 --==BOUNDARY==
