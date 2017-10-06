@@ -6,8 +6,8 @@ deploy-swarm:
 	terraform apply
 
 connect-docker-swarm:
-	@ssh -NL localhost:2374:/var/run/docker.sock docker@$(manager_address) -o StrictHostKeyChecking=no &
-	@export DOCKER_HOST=tcp://127.0.0.1:2374
+	ssh -NL localhost:2374:/var/run/docker.sock docker@$(manager_address) -o StrictHostKeyChecking=no &
+	export DOCKER_HOST=tcp://127.0.0.1:2374
 
 teardown: 
 	terraform destroy

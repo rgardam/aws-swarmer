@@ -41,22 +41,17 @@ module "vpc" {
 
   name = "swarm"
 
-  cidr = "10.0.0.0/16"
+  cidr = "${var.vpc_cidr_block}"
 
-  azs            = ["eu-west-1a", "eu-west-1b"]
-  public_subnets = ["10.0.101.0/24", "10.0.102.0/24"]
-  private_subnets = ["10.0.1.0/24", "10.0.2.0/24"]
+  azs            = ["${var.vpc_azs}"]
+  public_subnets = ["${var.public_subnets}"]
+  private_subnets = ["${var.private_subnets}"]
 
   enable_dns_support   = true
   enable_dns_hostnames = true
 
   enable_nat_gateway = true
   single_nat_gateway = true
-
-  tags = {
-    Owner       = "user"
-    Environment = "dev"
-  }
 }
 
 ### Security Groups ### 
@@ -105,9 +100,7 @@ resource "aws_security_group" "swarm" {
     to_port   = 80
     protocol  = "tcp"
 
-    cidr_blocks = [
-      "77.180.171.202/32",
-    ]
+    cidr_blocks = ["${var.public_access_addresses}"]
   }
 
   ingress {
@@ -115,9 +108,7 @@ resource "aws_security_group" "swarm" {
     to_port   = 443
     protocol  = "tcp"
 
-    cidr_blocks = [
-      "77.180.171.202/32",
-    ]
+    cidr_blocks = ["${var.public_access_addresses}"]
   }
 
   ingress {
@@ -125,9 +116,7 @@ resource "aws_security_group" "swarm" {
     to_port   = 22
     protocol  = "tcp"
 
-    cidr_blocks = [
-      "77.180.171.202/32",
-    ]
+    cidr_blocks = ["${var.public_access_addresses}"]
   }
 
   egress {
@@ -237,7 +226,7 @@ resource "aws_iam_role_policy" "swarm" {
 resource "aws_instance" "bootstrap_manager" {
   count                       = "1"
   ami                         = "${data.aws_ami.amazon_linux.id}"
-  instance_type               = "t2.micro"
+  instance_type               = "${var.manager_instance_size}"
   subnet_id                   = "${element(module.vpc.public_subnets, count.index)}"
   user_data                   = "${data.template_file.cloud_init_bootstrap.rendered}"
   associate_public_ip_address = true
@@ -249,7 +238,7 @@ resource "aws_instance" "bootstrap_manager" {
 resource "aws_instance" "additional_managers" {
   count                       = "1"
   ami                         = "${data.aws_ami.amazon_linux.id}"
-  instance_type               = "t2.micro"
+  instance_type               = "${var.manager_instance_size}"
   subnet_id                   = "${element(module.vpc.private_subnets, count.index)}"
   user_data                   = "${data.template_file.cloud_init_manager.rendered}"
   associate_public_ip_address = false
@@ -257,14 +246,61 @@ resource "aws_instance" "additional_managers" {
   iam_instance_profile        = "${aws_iam_instance_profile.swarm.name}"
 }
 
-### Swarm Manager Worker Instances ###
-resource "aws_instance" "workers" {
-  count                       = "2"
-  ami                         = "${data.aws_ami.amazon_linux.id}"
-  instance_type               = "t2.micro"
-  subnet_id                   = "${element(module.vpc.private_subnets, count.index)}"
-  user_data                   = "${data.template_file.cloud_init_worker.rendered}"
-  associate_public_ip_address = false
-  vpc_security_group_ids      = ["${aws_security_group.swarm.id}"]
-  iam_instance_profile        = "${aws_iam_instance_profile.swarm.name}"
+### Launch configuration and autoscaling group for swarm worker
+module "swarm_worker_asg" {
+  source = "terraform-aws-modules/autoscaling/aws"
+
+  lc_name = "swarm-worker-lc"
+
+  image_id        = "${data.aws_ami.amazon_linux.id}"
+  instance_type   = "${var.worker_instance_size}"
+  security_groups = ["${aws_security_group.swarm.id}"]
+  load_balancers  = ["${module.elb.this_elb_id}"]
+  user_data = "${data.template_file.cloud_init_worker.rendered}"
+  iam_instance_profile = "${aws_iam_instance_profile.swarm.name}"
+  root_block_device = [
+    {
+      volume_size = "20"
+      volume_type = "gp2"
+    },
+  ]
+
+  # Auto scaling group
+  asg_name                  = "swarm-worker-asg"
+  vpc_zone_identifier       = ["${module.vpc.private_subnets}"]
+  health_check_type         = "EC2"
+  min_size                  = "${var.worker_min_asg_size}"
+  max_size                  = "${var.worker_max_asg_size}"
+  desired_capacity          = "${var.worker_desired_asg_size}"
+  wait_for_capacity_timeout = 0
+}
+
+### Swarm Worker ELB ###
+module "elb" {
+  source = "terraform-aws-modules/elb/aws"
+
+  name = "swarm-elb"
+
+  subnets         = ["${module.vpc.private_subnets}"]
+  security_groups = ["${aws_security_group.swarm.id}"]
+  internal        = false
+
+  listener = [
+    {
+      instance_port     = "80"
+      instance_protocol = "HTTP"
+      lb_port           = "80"
+      lb_protocol       = "HTTP"
+    },
+  ]
+
+  health_check = [
+    {
+      target              = "HTTP:80/"
+      interval            = 30
+      healthy_threshold   = 2
+      unhealthy_threshold = 2
+      timeout             = 5
+    },
+  ]
 }
