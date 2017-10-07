@@ -60,44 +60,25 @@ resource "aws_security_group" "swarm" {
   description = "Security group for swarm cluster instances"
   vpc_id      = "${module.vpc.vpc_id}"
 
+  # allow all internal VPC traffic
   ingress {
-    from_port = 2375
-    to_port   = 2377
-    protocol  = "tcp"
-    self      = true
-  }
-
-  ingress {
-    from_port = 7946
-    to_port   = 7946
-    protocol  = "tcp"
-    self      = true
-  }
-
-  ingress {
-    from_port = 7946
-    to_port   = 7946
-    protocol  = "udp"
-    self      = true
-  }
-
-  ingress {
-    from_port = 4789
-    to_port   = 4789
-    protocol  = "tcp"
-    self      = true
-  }
-
-  ingress {
-    from_port = 4789
-    to_port   = 4789
-    protocol  = "udp"
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
     self      = true
   }
 
   ingress {
     from_port = 80
     to_port   = 80
+    protocol  = "tcp"
+
+    cidr_blocks = ["${var.public_access_addresses}"]
+  }
+
+  ingress {
+    from_port = 8080
+    to_port   = 8080
     protocol  = "tcp"
 
     cidr_blocks = ["${var.public_access_addresses}"]
@@ -281,16 +262,16 @@ module "elb" {
 
   name = "swarm-elb"
 
-  subnets         = ["${module.vpc.private_subnets}"]
+  subnets         = ["${module.vpc.public_subnets}"]
   security_groups = ["${aws_security_group.swarm.id}"]
   internal        = false
 
   listener = [
     {
-      instance_port     = "80"
-      instance_protocol = "HTTP"
+      instance_port     = "8080"
+      instance_protocol = "TCP"
       lb_port           = "80"
-      lb_protocol       = "HTTP"
+      lb_protocol       = "TCP"
     },
   ]
 
