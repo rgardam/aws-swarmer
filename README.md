@@ -10,6 +10,7 @@ To deploy
 To enable remote management of the docker swarm 
 
 ```make connect-docker-swarm```
+
 ```export DOCKER_HOST=tcp://127.0.0.1:2374```
 
 To destroy all infrastructure 
