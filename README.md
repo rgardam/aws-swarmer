@@ -10,14 +10,16 @@ To deploy
 To enable remote management of the docker swarm 
 
 ```make connect-docker-swarm```
+```export DOCKER_HOST=tcp://127.0.0.1:2374```
 
 To destroy all infrastructure 
 
 ```make teardown ```
 
-
 TODO. 
-
-- Use autoscaling groups to manage workers
 - Handle multiple ssh users
-- Make into a proper terraform module
+
+BUGS. 
+- There is currently an issue with routing a HTTP ELB. 
+    * It appears that when a HTTP ELB is used with a container listening on the same port the request takes up to 30 seconds. 
+    * Switching to a TCP ELB resolves this issue. It would mean that a nginx container is needed to terminate http requests.
