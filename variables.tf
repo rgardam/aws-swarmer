@@ -36,6 +36,11 @@ variable "private_subnets" {
   default = ["10.0.1.0/24", "10.0.2.0/24"]
 }
 
+variable "enable_s3_endpoint" {
+  description = "whether we should enable the s3 endpoint in the vpc"
+  default = true
+}
+
 ### Instance configuration ###
 variable "manager_instance_size" {
   description = "the instance size of the swarm manager"

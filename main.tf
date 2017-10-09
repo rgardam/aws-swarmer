@@ -52,6 +52,8 @@ module "vpc" {
 
   enable_nat_gateway = true
   single_nat_gateway = true
+
+  enable_s3_endpoint = "${var.enable_s3_endpoint}"
 }
 
 ### Security Groups ### 
