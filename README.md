@@ -17,9 +17,6 @@ To destroy all infrastructure
 
 ```make teardown ```
 
-TODO. 
-- Handle multiple ssh users
-
 BUGS. 
 - There is currently an issue with routing a HTTP ELB. 
     * It appears that when a HTTP ELB is used with a container listening on the same port the request takes up to 30 seconds. 
