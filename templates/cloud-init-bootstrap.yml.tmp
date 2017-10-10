@@ -10,7 +10,7 @@ users:
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
     shell: /bin/bash
     ssh-authorized-keys:
-      - ${ssh_public_keystring}
+      - ${ssh_public_keystrings}
  
 runcmd:
   - yum install -y aws-cli jq docker
