@@ -13,9 +13,12 @@ users:
       - ${ssh_public_keystrings}
  
 runcmd:
-  - yum install -y aws-cli jq docker
-  - service docker start
-  - chkconfig --add docker
+  - yum install -y aws-cli jq yum-utils device-mapper-persistent-data lvm2 epel-release
+  - yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+  - yum install docker-ce python-pip -y
+  - pip install awscli==1.11.170
+  - systemctl start docker
+  - systemctl enable docker
   - docker swarm init
   - aws ssm put-parameter --name ${random_id}.managerKey --value "`docker swarm join-token manager -q`" --type SecureString --region ${region} --overwrite
   - aws ssm put-parameter --name ${random_id}.workerKey --value "`docker swarm join-token worker -q`" --type SecureString --region ${region} --overwrite
