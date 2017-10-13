@@ -3,22 +3,21 @@ provider "aws" {
 }
 
 ### Data Gatherers ###
-data "aws_ami" "amazon_linux" {
+data "aws_ami" "centos7" {
   most_recent = true
 
   filter {
-    name = "name"
+    name = "product-code"
 
     values = [
-      "amzn-ami-hvm-*-x86_64-gp2",
+      "aw0evgkw8e5c1q413zgy5pjce",
     ]
   }
-
   filter {
     name = "owner-alias"
 
     values = [
-      "amazon",
+      "aws-marketplace",
     ]
   }
 }
@@ -218,7 +217,7 @@ resource "aws_iam_role_policy" "swarm" {
 ### Swarm Manager Bootstrap Instance ###
 resource "aws_instance" "bootstrap_manager" {
   count                       = "1"
-  ami                         = "${data.aws_ami.amazon_linux.id}"
+  ami                         = "${data.aws_ami.centos7.id}"
   instance_type               = "${var.manager_instance_size}"
   subnet_id                   = "${element(module.vpc.public_subnets, count.index)}"
   user_data                   = "${data.template_file.cloud_init_bootstrap.rendered}"
@@ -235,7 +234,7 @@ resource "aws_instance" "bootstrap_manager" {
 # ### Swarm Manager Manager Instances ###
 resource "aws_instance" "additional_managers" {
   count                       = "${var.additional_manager_count}"
-  ami                         = "${data.aws_ami.amazon_linux.id}"
+  ami                         = "${data.aws_ami.centos7.id}"
   instance_type               = "${var.manager_instance_size}"
   subnet_id                   = "${element(module.vpc.private_subnets, count.index)}"
   user_data                   = "${data.template_file.cloud_init_manager.rendered}"
@@ -255,7 +254,7 @@ module "swarm_worker_asg" {
 
   lc_name = "swarm-worker-lc-${var.name}"
 
-  image_id        = "${data.aws_ami.amazon_linux.id}"
+  image_id        = "${data.aws_ami.centos7.id}"
   instance_type   = "${var.worker_instance_size}"
   security_groups = ["${aws_security_group.swarm.id}"]
   load_balancers  = ["${module.elb.this_elb_id}"]
