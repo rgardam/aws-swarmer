@@ -36,7 +36,7 @@ resource "random_id" "key" {
 
 ### VPC Setup ###
 module "vpc" {
-  source = "terraform-aws-modules/vpc/aws"
+  source = "git::https://github.com/terraform-aws-modules/terraform-aws-vpc.git?ref=v1.0.3"
 
   name = "swarm-${var.name}"
 
@@ -179,6 +179,7 @@ data "template_file" "instance_profile" {
     account_id = "${data.aws_caller_identity.current.account_id}"
     kms_key_id = "${aws_kms_key.swarm_key.id}"
     random_id  = "${random_id.key.hex}"
+    name       = "${var.name}"
   }
 }
 

@@ -2,7 +2,7 @@ manager_address=$(shell terraform output bootstrapped_instance_dns)
 
 deploy-swarm:
 	terraform init
-	terraform plan 
+	terraform plan
 	terraform apply
 
 connect-docker-swarm:
