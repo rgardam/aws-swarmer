@@ -36,7 +36,7 @@ resource "random_id" "key" {
 
 ### VPC Setup ###
 module "vpc" {
-  source = "terraform-aws-modules/vpc/aws?v1.0.3"
+  source = "terraform-aws-modules/vpc/aws?ref=v1.0.3"
 
   name = "swarm-${var.name}"
 
