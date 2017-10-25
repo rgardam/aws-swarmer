@@ -179,6 +179,7 @@ data "template_file" "instance_profile" {
     account_id = "${data.aws_caller_identity.current.account_id}"
     kms_key_id = "${aws_kms_key.swarm_key.id}"
     random_id  = "${random_id.key.hex}"
+    name       = "${var.name}"
   }
 }
 
