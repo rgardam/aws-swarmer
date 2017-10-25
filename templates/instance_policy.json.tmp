@@ -37,7 +37,7 @@
         "logs:DescribeLogStreams"
     ],
       "Resource": [
-        "arn:aws:logs:${region}:${account_id}:${name}*"
+        "arn:aws:logs:${region}:${account_id}:log-group:${name}*"
     ]
   }
   ]
