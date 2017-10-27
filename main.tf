@@ -305,9 +305,16 @@ module "elb" {
     Terraform      = "True"
     Name = "${var.name}"
   }
-  
   listener     = ["${var.listener}"]
   access_logs  = ["${var.access_logs}"]
-  health_check = ["${var.health_check}"]
 
+  health_check = [
+    {
+      target              = "TCP:7946"
+      interval            = 30
+      healthy_threshold   = 2
+      unhealthy_threshold = 2
+      timeout             = 5
+    },
+  ]
 }
