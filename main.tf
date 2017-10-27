@@ -305,21 +305,8 @@ module "elb" {
     Terraform      = "True"
     Name = "${var.name}"
   }
-
-  listener = [
-    {
-      instance_port     = "8080"
-      instance_protocol = "TCP"
-      lb_port           = "80"
-      lb_protocol       = "TCP"
-    },
-    {
-      instance_port     = "443"
-      instance_protocol = "TCP"
-      lb_port           = "443"
-      lb_protocol       = "TCP"
-    },
-  ]
+  listener     = ["${var.listener}"]
+  access_logs  = ["${var.access_logs}"]
 
   health_check = [
     {

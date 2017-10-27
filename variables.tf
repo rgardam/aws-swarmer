@@ -76,3 +76,25 @@ variable "worker_desired_asg_size" {
   description = "The maximum number of worker nodes in the swarm cluster"
   default = 1
 }
+
+### ELB configuration ###
+# Listener
+variable "listener" {
+  description = "A list of listener blocks"
+  type        = "list"
+  default = [
+    {
+      instance_port     = "443"
+      instance_protocol = "TCP"
+      lb_port           = "443"
+      lb_protocol       = "TCP"
+    },
+  ]
+}
+
+# Access logs
+variable "access_logs" {
+  description = "An access logs block"
+  type        = "list"
+  default     = []
+}
