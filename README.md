@@ -18,6 +18,5 @@ To destroy all infrastructure
 ```make teardown ```
 
 BUGS. 
-- There is currently an issue with routing a HTTP ELB. 
-    * It appears that when a HTTP ELB is used with a container listening on the same port the request takes up to 30 seconds. 
-    * Switching to a TCP ELB resolves this issue. It would mean that a nginx container is needed to terminate http requests.
+- There is currently an issue with docker swarm that is affecting the overlay network.
+    - see https://github.com/moby/moby/issues/32195 for more information

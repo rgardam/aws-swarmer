@@ -313,6 +313,12 @@ module "elb" {
       lb_port           = "80"
       lb_protocol       = "TCP"
     },
+    {
+      instance_port     = "443"
+      instance_protocol = "TCP"
+      lb_port           = "443"
+      lb_protocol       = "TCP"
+    },
   ]
 
   health_check = [
